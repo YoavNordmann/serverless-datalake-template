@@ -1,0 +1,40 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://localhost:31112
+functions:
+  clickevent-ingest:
+    lang: python3-http
+    handler: ./clickevent-ingest
+    image: clickevent-ingest:latest
+    environment:
+      nats_url: nats://nats.openfaas:4222
+      write_debug: true    
+  clickevent-rawdata:
+    lang: python3
+    handler: ./clickevent-rawdata
+    image: clickevent-rawdata:latest
+    environment:
+      nats_url: nats://nats.openfaas:4222
+      write_debug: true
+    annotations:
+      topic: clickevent.ingest
+  clickevent-stagingdata:
+    lang: python3
+    handler: ./clickevent-stagingdata
+    image: clickevent-stagingdata:latest
+    environment:
+      nats_url: nats://nats.openfaas:4222
+      write_debug: true
+    annotations:
+      topic: clickevent.rawdata
+  clickevent-processeddata:
+    lang: python3
+    handler: ./clickevent-processeddata
+    image: clickevent-processeddata:latest
+    environment:
+      nats_url: nats://nats.openfaas:4222
+      write_debug: true
+    annotations:
+      topic: clickevent.stagingdata
+
